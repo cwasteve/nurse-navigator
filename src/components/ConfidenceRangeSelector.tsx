@@ -35,8 +35,8 @@ export default function ConfidenceRangeSelector({ onSelect }: ConfidenceRangeSel
   return (
     <div className="flex items-center gap-2">
       <Input
-        type="text"
-        inputMode="numeric"
+        type="text" // Used so we don't accidentally scroll the mouse or hit the up/down arrow and change it
+        inputMode="numeric" // This is better for phones and tablets - tablets are the more possible use case here
         min={0}
         max={100}
         step={1}

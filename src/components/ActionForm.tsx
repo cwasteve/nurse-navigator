@@ -180,7 +180,6 @@ export default function ActionForm({
             />
           )}
 
-          {/* Action button */}
           <div className="flex justify-end">
             {actionIntent === FOLLOW_UP_ACTION && (
               <Button
@@ -203,7 +202,7 @@ export default function ActionForm({
         </div>
       )}
 
-      {/* Revert action — just a button, no note field */}
+      {/* Revert action — just a button, no note field on revert */}
       {actionIntent === REVERT && (
         <div className="flex justify-end">
           <Button
