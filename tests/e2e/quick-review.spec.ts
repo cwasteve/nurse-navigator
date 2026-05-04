@@ -25,7 +25,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('select matches, quick review, and verify summary', async ({ page }) => {
-  // Select 3 checkboxes in the pending tab
+  // Select 3 checkboxes in the unreviewed tab
   const checkboxes = page.locator('table tbody tr input[type="checkbox"]');
   await checkboxes.nth(0).check();
   await checkboxes.nth(1).check();

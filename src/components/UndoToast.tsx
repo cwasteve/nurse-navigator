@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Undo2 } from 'lucide-react';
-
-export interface UndoToastItem {
-  id: string;
-  message: string;
-  onUndo: () => void;
-}
-
-interface UndoToastProps {
-  toasts: UndoToastItem[];
-  onDismiss: (id: string) => void;
-}
+import type { UndoToastItem } from '../types';
+import { useAppCtx } from '../contexts';
 
 function Toast({ toast, onDismiss }: { toast: UndoToastItem; onDismiss: () => void }) {
   const [progress, setProgress] = useState(100);
@@ -58,16 +49,18 @@ function Toast({ toast, onDismiss }: { toast: UndoToastItem; onDismiss: () => vo
   );
 }
 
-export default function UndoToast({ toasts, onDismiss }: UndoToastProps) {
-  if (toasts.length === 0) return null;
+export default function UndoToast() {
+  const { undoToasts, dismissToast } = useAppCtx();
+
+  if (undoToasts.length === 0) return null;
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col-reverse gap-2">
-      {toasts.map((toast) => (
+      {undoToasts.map((toast) => (
         <Toast
           key={toast.id}
           toast={toast}
-          onDismiss={() => onDismiss(toast.id)}
+          onDismiss={() => dismissToast(toast.id)}
         />
       ))}
     </div>

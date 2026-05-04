@@ -77,3 +77,20 @@ export interface TabDef {
   key: TabKey;
   label: string;
 }
+
+// --- Undo toast types ---
+
+export interface UndoToastItem {
+  id: string;
+  message: string;
+  onUndo: () => void;
+}
+
+// --- Search suggestion types ---
+
+export interface SearchSuggestion {
+  record: MatchRecord;
+  label: string;
+  dob?: string;
+  confidence?: string;
+}

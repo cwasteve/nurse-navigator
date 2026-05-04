@@ -39,13 +39,13 @@ const sampleNotes: Note[] = [
 
 // ─── Pending status ──────────────────────────────────────────────────
 
-test.describe('CompareModal — pending status', () => {
+test.describe('CompareModal — unreviewed status', () => {
   const mountPending = (overrides = {}) => ({
     open: true,
     internalPatient: ip,
     externalPatient: ep,
     confidenceScore: 0.92,
-    status: 'pending' as const,
+    status: 'unreviewed' as const,
     onClose: noop,
     onConfirmDirect: noop,
     onRejectDirect: noop,
@@ -70,11 +70,7 @@ test.describe('CompareModal — pending status', () => {
 
   test('clicking Confirm immediately fires onConfirmDirect', async ({ mount, page }) => {
     const calls: unknown[] = [];
-    await mount(
-      <CompareModal
-        {...mountPending({ onConfirmDirect: (note?: string) => calls.push({ note }) })}
-      />,
-    );
+    await mount(<CompareModal {...mountPending({ onConfirmDirect: (note?: string) => calls.push({ note }) })} />);
     await page.getByRole('radio', { name: /Confirm/i }).click();
     // Should fire immediately — no second button needed
     expect(calls).toEqual([{ note: undefined }]);
@@ -154,11 +150,7 @@ test.describe('CompareModal — follow_up status', () => {
 
   test('Revert to Unreviewed calls onUndoDirect', async ({ mount, page }) => {
     const calls: unknown[] = [];
-    await mount(
-      <CompareModal
-        {...mountFollowUp({ onUndoDirect: () => calls.push('undo') })}
-      />,
-    );
+    await mount(<CompareModal {...mountFollowUp({ onUndoDirect: () => calls.push('undo') })} />);
     await page.getByRole('radio', { name: /Revert to Unreviewed/i }).click();
     await page.getByRole('button', { name: 'Revert to Unreviewed' }).click();
     expect(calls).toEqual(['undo']);
@@ -166,11 +158,7 @@ test.describe('CompareModal — follow_up status', () => {
 
   test('selecting Confirm from follow_up fires immediately', async ({ mount, page }) => {
     const calls: unknown[] = [];
-    await mount(
-      <CompareModal
-        {...mountFollowUp({ onConfirmDirect: (note?: string) => calls.push({ note }) })}
-      />,
-    );
+    await mount(<CompareModal {...mountFollowUp({ onConfirmDirect: (note?: string) => calls.push({ note }) })} />);
     await page.getByRole('radio', { name: /Confirm/i }).click();
     expect(calls).toEqual([{ note: undefined }]);
   });
@@ -210,7 +198,7 @@ test.describe('CompareModal — rejected status', () => {
         open={true}
         internalPatient={ip}
         externalPatient={ep}
-        confidenceScore={0.70}
+        confidenceScore={0.7}
         status="rejected"
         onClose={noop}
         onConfirmDirect={noop}
@@ -238,7 +226,7 @@ test.describe('CompareModal — title', () => {
         internalPatient={ip}
         externalPatient={ep}
         confidenceScore={0.92}
-        status="pending"
+        status="unreviewed"
         onClose={noop}
         onConfirmDirect={noop}
         onRejectDirect={noop}
@@ -258,7 +246,7 @@ test.describe('CompareModal — title', () => {
         internalPatient={ip}
         externalPatient={null}
         confidenceScore={null}
-        status="pending"
+        status="unreviewed"
         onClose={noop}
         onConfirmDirect={noop}
         onRejectDirect={noop}

@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }) => {
   await page.waitForSelector('text=Unreviewed');
 });
 
-test('confirm a match via CompareModal inline action and undo it back to pending', async ({ page }) => {
+test('confirm a match via CompareModal inline action and undo it back to unreviewed', async ({ page }) => {
   // Click Compare on the first row to open CompareModal
   const firstCompare = page.locator('table tbody tr').first().getByRole('button', { name: 'Compare' });
   await firstCompare.click();
@@ -52,6 +52,6 @@ test('confirm a match via CompareModal inline action and undo it back to pending
 
   // Navigate back to Unreviewed tab and verify the match is back
   await page.getByRole('button', { name: /Unreviewed/ }).click();
-  const pendingRows = page.locator('table tbody tr');
-  await expect(pendingRows).not.toHaveCount(0);
+  const unreviewedRows = page.locator('table tbody tr');
+  await expect(unreviewedRows).not.toHaveCount(0);
 });

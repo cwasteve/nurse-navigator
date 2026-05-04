@@ -5,6 +5,8 @@ import type { MatchStatus } from '../types';
 import type { UseMatchReviewStoreReturn } from './useMatchReviewStore';
 import { buildPatientMap } from '../utils/patients';
 
+const { UNREVIEWED } = STATUS;
+
 import internalData from '../data/internal.json';
 import externalData from '../data/external.json';
 import matchesData from '../data/matches.json';
@@ -29,7 +31,7 @@ export function useMatchData(reviewStore: UseMatchReviewStoreReturn) {
           match: m,
           internalPatient: ip,
           externalPatient: ep,
-          status: reviewStore.statuses[m.ExternalPatientId] ?? STATUS.PENDING,
+          status: reviewStore.statuses[m.ExternalPatientId] ?? UNREVIEWED,
           rejectionReason: reviewStore.rejectionReasons[m.ExternalPatientId],
           notes: reviewStore.notes[m.ExternalPatientId] ?? [],
         });
@@ -39,7 +41,7 @@ export function useMatchData(reviewStore: UseMatchReviewStoreReturn) {
   }, [internalMap, externalMap, reviewStore.statuses, reviewStore.rejectionReasons, reviewStore.notes]);
 
   const stats = useMemo(() => {
-    const counts = Object.fromEntries(Object.keys(STATUS_CONFIG).map(k => [k, 0])) as Record<MatchStatus, number>;
+    const counts = Object.fromEntries(Object.keys(STATUS_CONFIG).map((k) => [k, 0])) as Record<MatchStatus, number>;
     for (const r of matchRecords) counts[r.status]++;
     return counts;
   }, [matchRecords]);

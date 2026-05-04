@@ -1,15 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
-import type { MatchRecord } from '../types';
+import type { MatchRecord, SearchSuggestion } from '../types';
 import { StatusBadge } from './Badge';
 import Input from './Input';
-
-export interface SearchSuggestion {
-  record: MatchRecord;
-  label: string;
-  dob?: string;
-  confidence?: string;
-}
 
 interface SearchBarProps {
   value: string;

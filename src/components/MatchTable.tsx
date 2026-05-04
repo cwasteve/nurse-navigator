@@ -1,10 +1,14 @@
 import { useMemo } from 'react';
 import { ChevronUp, ChevronDown, MessageSquare } from 'lucide-react';
-import type { MatchStatus, MatchRecord, SortConfig } from '../types';
+import type { MatchStatus, MatchRecord } from '../types';
 import { COLUMNS, BASE_COLUMN_KEYS, COL, STATUS_CONFIG, REJECTION_CONFIG, STATUS } from '../constants';
 import type { ColumnKey } from '../constants';
 import type { TabKey } from '../constants';
 import { fullName, formatDOB, getDifferences } from '../utils/patients';
+import { useMatchFilterCtx, useAppCtx } from '../contexts';
+
+const { UNREVIEWED, CONFIRMED, FOLLOW_UP, REJECTED } = STATUS;
+const { EXTERNAL, REJECTION } = COL;
 import Button from './Button';
 import Checkbox from './Checkbox';
 import { ConfidenceBadge } from './Badge';
@@ -37,7 +41,7 @@ interface MatchRowProps {
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
   onCompare: (record: MatchRecord) => void;
-  onRequestAction: (type: 'confirm' | 'reject' | 'follow_up' | 'undo', externalId: string) => void;
+  onRequestReject: (id: string) => void;
   onStatusChange: (externalId: string, status: MatchStatus) => void;
   onOpenNotes: (externalId: string) => void;
 }
@@ -48,7 +52,7 @@ function MatchRow({
   isSelected,
   onToggleSelect,
   onCompare,
-  onRequestAction,
+  onRequestReject,
   onStatusChange,
   onOpenNotes,
 }: MatchRowProps) {
@@ -64,9 +68,11 @@ function MatchRow({
   return (
     <tr
       onClick={() => onCompare(record)}
-      className={`hover:bg-neutral-50/70 transition-colors cursor-pointer ${statusBorderClass} ${activeTab === STATUS.PENDING && isSelected ? 'bg-primary/7' : ''}`}>
-      {activeTab === STATUS.PENDING && (
-        <td className="px-4 py-3 cursor-default" onClick={(e) => e.stopPropagation()}>
+      className={`hover:bg-neutral-50/70 transition-colors cursor-pointer ${statusBorderClass} ${activeTab === UNREVIEWED && isSelected ? 'bg-primary/7' : ''}`}>
+      {activeTab === UNREVIEWED && (
+        <td
+          className="px-4 py-3 cursor-default"
+          onClick={(e) => e.stopPropagation()}>
           <Checkbox
             checked={isSelected}
             onChange={() => onToggleSelect(externalId)}
@@ -85,7 +91,7 @@ function MatchRow({
         <span className="font-medium text-neutral-800">{fullName(ep)}</span>
         <span className="block text-xs text-neutral-400">{formatDOB(ep.DOB)}</span>
       </td>
-      {activeTab === STATUS.REJECTED && (
+      {activeTab === REJECTED && (
         <td className="px-4 py-3">
           {record.rejectionReason && (
             <span className="inline-flex items-center px-1.5 py-0.5 text-[11px] font-medium rounded bg-danger-bg text-danger">
@@ -109,8 +115,10 @@ function MatchRow({
           </div>
         )}
       </td>
-      <td className="px-4 py-3 cursor-default" onClick={(e) => e.stopPropagation()}>
-        {noteCount > 0 || record.status === STATUS.FOLLOW_UP ? (
+      <td
+        className="px-4 py-3 cursor-default"
+        onClick={(e) => e.stopPropagation()}>
+        {noteCount > 0 || record.status === FOLLOW_UP ? (
           <Button
             variant="ghost"
             size="sm"
@@ -123,7 +131,9 @@ function MatchRow({
           <span className="text-xs text-neutral-300">—</span>
         )}
       </td>
-      <td className="px-4 py-3 text-right cursor-default" onClick={(e) => e.stopPropagation()}>
+      <td
+        className="px-4 py-3 text-right cursor-default"
+        onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-end gap-2">
           <Button
             variant="secondary"
@@ -131,45 +141,45 @@ function MatchRow({
             onClick={() => onCompare(record)}>
             Compare
           </Button>
-          {record.status === STATUS.PENDING ? (
+          {record.status === UNREVIEWED ? (
             <>
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => onStatusChange(externalId, STATUS.CONFIRMED)}>
+                onClick={() => onStatusChange(externalId, CONFIRMED)}>
                 Confirm
               </Button>
               <Button
                 variant="warning"
                 size="sm"
-                onClick={() => onStatusChange(externalId, STATUS.FOLLOW_UP)}>
+                onClick={() => onStatusChange(externalId, FOLLOW_UP)}>
                 Follow Up
               </Button>
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => onRequestAction('reject', externalId)}>
+                onClick={() => onRequestReject(externalId)}>
                 Reject
               </Button>
             </>
-          ) : record.status === STATUS.FOLLOW_UP ? (
+          ) : record.status === FOLLOW_UP ? (
             <>
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => onStatusChange(externalId, STATUS.PENDING)}>
+                onClick={() => onStatusChange(externalId, UNREVIEWED)}>
                 Undo
               </Button>
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => onStatusChange(externalId, STATUS.CONFIRMED)}>
+                onClick={() => onStatusChange(externalId, CONFIRMED)}>
                 Confirm
               </Button>
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => onRequestAction('reject', externalId)}>
+                onClick={() => onRequestReject(externalId)}>
                 Reject
               </Button>
             </>
@@ -177,7 +187,7 @@ function MatchRow({
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => onStatusChange(externalId, STATUS.PENDING)}>
+              onClick={() => onStatusChange(externalId, UNREVIEWED)}>
               Undo
             </Button>
           )}
@@ -189,40 +199,25 @@ function MatchRow({
 
 // --- Table ---
 
-interface MatchTableProps {
-  records: MatchRecord[];
-  activeTab: TabKey;
-  sort: SortConfig;
-  onToggleSort: (key: string) => void;
-  selectedIds: Set<string>;
-  onToggleSelectAll: () => void;
-  onToggleSelectRow: (id: string) => void;
-  onCompare: (record: MatchRecord) => void;
-  onRequestAction: (type: 'confirm' | 'reject' | 'follow_up' | 'undo', externalId: string) => void;
-  onStatusChange: (externalId: string, status: MatchStatus) => void;
-  onOpenNotes: (externalId: string) => void;
-}
+export default function MatchTable() {
+  const {
+    tabFiltered: records,
+    activeTab,
+    sort,
+    toggleSort,
+    selectedIds,
+    toggleSelectAll,
+    toggleSelectRow,
+  } = useMatchFilterCtx();
+  const { openCompare, requestReject, handleStatusChange, openNoteDialog } = useAppCtx();
 
-export default function MatchTable({
-  records,
-  activeTab,
-  sort,
-  onToggleSort,
-  selectedIds,
-  onToggleSelectAll,
-  onToggleSelectRow,
-  onCompare,
-  onRequestAction,
-  onStatusChange,
-  onOpenNotes,
-}: MatchTableProps) {
   const sortDir = (key: string) => (sort.key === key ? sort.direction : null);
 
   const columnKeys: ColumnKey[] = useMemo(() => {
-    if (activeTab === STATUS.REJECTED) {
+    if (activeTab === REJECTED) {
       const keys = [...BASE_COLUMN_KEYS];
-      const externalIdx = keys.indexOf(COL.EXTERNAL);
-      keys.splice(externalIdx + 1, 0, COL.REJECTION);
+      const externalIdx = keys.indexOf(EXTERNAL);
+      keys.splice(externalIdx + 1, 0, REJECTION);
       return keys;
     }
     return [...BASE_COLUMN_KEYS];
@@ -234,11 +229,11 @@ export default function MatchTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-neutral-50 border-b border-neutral-200">
-              {activeTab === STATUS.PENDING && (
+              {activeTab === UNREVIEWED && (
                 <th className="px-4 py-3 w-10">
                   <Checkbox
                     checked={records.length > 0 && records.every((r) => selectedIds.has(r.match.ExternalPatientId))}
-                    onChange={onToggleSelectAll}
+                    onChange={toggleSelectAll}
                     aria-label="Select all"
                   />
                 </th>
@@ -250,7 +245,7 @@ export default function MatchTable({
                     key={key}
                     className={`px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider select-none transition-colors
                       ${col.sortable ? 'cursor-pointer hover:text-neutral-700' : ''}`}
-                    onClick={() => onToggleSort(key)}>
+                    onClick={() => toggleSort(key)}>
                     <span className="inline-flex items-center gap-1">
                       {col.label}
                       {col.sortable && <SortIcon direction={sortDir(key)} />}
@@ -271,17 +266,17 @@ export default function MatchTable({
                 record={record}
                 activeTab={activeTab}
                 isSelected={selectedIds.has(record.match.ExternalPatientId)}
-                onToggleSelect={onToggleSelectRow}
-                onCompare={onCompare}
-                onRequestAction={onRequestAction}
-                onStatusChange={onStatusChange}
-                onOpenNotes={onOpenNotes}
+                onToggleSelect={toggleSelectRow}
+                onCompare={openCompare}
+                onRequestReject={requestReject}
+                onStatusChange={handleStatusChange}
+                onOpenNotes={openNoteDialog}
               />
             ))}
             {records.length === 0 && (
               <tr>
                 <td
-                  colSpan={columnKeys.length + (activeTab === STATUS.PENDING ? 2 : 1)}
+                  colSpan={columnKeys.length + (activeTab === UNREVIEWED ? 2 : 1)}
                   className="px-4 py-12 text-center text-neutral-400 text-sm">
                   No matches found.
                 </td>

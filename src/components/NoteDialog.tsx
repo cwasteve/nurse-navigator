@@ -1,21 +1,23 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import type { Note } from '../types';
-import { formatTimestamp } from '../utils/patients';
+import { STATUS } from '../constants/status';
+import { fullName, formatTimestamp } from '../utils/patients';
+
+const { FOLLOW_UP } = STATUS;
+import { useAppCtx } from '../contexts';
 import NoteInput from './NoteInput';
 
-interface NoteDialogProps {
-  open: boolean;
-  onClose: () => void;
-  notes: Note[];
-  onAddNote: (text: string) => void;
-  patientLabel: string;
-  editable?: boolean;
-}
+export default function NoteDialog() {
+  const { noteDialogRecord, closeNoteDialog, handleAddNote } = useAppCtx();
 
-export default function NoteDialog({ open, onClose, notes, onAddNote, patientLabel, editable = false }: NoteDialogProps) {
+  if (!noteDialogRecord) return null;
+
+  const { notes, externalPatient, match, status } = noteDialogRecord;
+  const patientLabel = fullName(externalPatient);
+  const editable = status === FOLLOW_UP;
+
   return (
-    <Dialog.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Dialog.Root open onOpenChange={(isOpen) => { if (!isOpen) closeNoteDialog(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
         <Dialog.Content
@@ -58,7 +60,7 @@ export default function NoteDialog({ open, onClose, notes, onAddNote, patientLab
 
           {editable && (
             <div className="border-t border-neutral-200 px-5 py-4">
-              <NoteInput onSubmit={onAddNote} />
+              <NoteInput onSubmit={(text) => handleAddNote(match.ExternalPatientId, text)} />
             </div>
           )}
         </Dialog.Content>

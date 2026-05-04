@@ -55,7 +55,13 @@ The principles guiding these decisions have always been (in this order):
 2. What does the shape of the data we get allow us?
 3. What are reasonable/foreseeable challenges we might encounter with other datasets that could be pulled in?
 
-The first two are easy to control for. Regarding the third I've had to make "reasonable decisions" like the extent to which my date normalization (for search, display) util will accept different values and phone number format (i.e. we don't currently have to do any normalization there with our limited datasets).
+The first two are easy to control for. In fact, I've chosen a pretty bland UI so the action buttons and options will stand out. This is utility-focused, not fancy - but meant to still be a delightful UI to use in functionality. Regarding the third I've had to make "reasonable decisions" like the extent to which my date normalization (for search, display) util will accept different values and phone number format (i.e. we don't currently have to do any normalization there with our limited datasets).
+
+### Data Focus
+
+This is a bit odd. You'd expect to use the internal data as the main reference point in most cases - since that's our data.
+
+However, this application only cares about matches, so more often than not we're referencing the `external` ID as our UUID instead. This is because an action is being taken _regarding the external record_ and NOT our internal record. For example, an external record is either accepted or rejected as a match. The internal record is NOT. It is the actual source of truth and the thing we're matching to.
 
 ### Nurse ID
 
@@ -64,6 +70,20 @@ One thing I _did_ add was a "Nurse ID" so that the "Notes" we added would have s
 ### Consts & Data Structures
 
 Additionally, I made the decision to structure my constants in the `/constants` folder in a certain way to make typing that much easier, avoid testing for strings, and have a unified codebase without scattered `const` values throughout.
+
+### IndexedDB vs LocalStorage
+
+I've used LocalStorage extensively in the past, so I'm much more comfortable with it and it's a pretty straightforward and simple API. However, our use case lends itself better to IndexedDB - especially since we'd be using a real DB in a production environment.
+
+I hadn't worked with IndexedDB, so I had to do a little research on it. There's admittedly some additional complexity regarding modifying data (which requires the `upgrade` method), however, that felt minimal. You could easily run this using LocalStorage instead due to the small size and relative simplicity of the data shape. I just think you'd be essentially massaging the data shape more to work with LocalStorage, so I chose IndexedDB instead. The library `idb` just adds a more developer-friendly wrapper around that.
+
+### Hooks vs Prop Drilling
+
+Arguably, this application is small enough to just use prop-drilling for passing data states around from parent to child. However, that's just not a good pattern for scalability and in case the application increases in size. Additionally, the minimal overhead of adding context/providers and hooks is worth it, IMO.
+
+There's not much cognitive complexity and even though I like to keep related code as close as possible to where it's used, this pattern is so common that any dev would be able to maintain the repo easily.
+
+So `AppContext` consumes the `MatchFilterContext` (what data are we displaying and/or interacting with when it comes to multiple records) `MatchDataContext` (what data are we displaying/interacting with for an individual record).
 
 ### Testing Decisions
 
@@ -157,6 +177,8 @@ After seeing what it came up with, I had it code some of the foundations and the
 I tend to treat AI like a junior developer. If you create the architectural guidance and requirements, give it very specific instructions, and then check its work - it's a great way to delegate. After all, creating a component is more or less boilerplate. Same with creating a hook. But knowing how to architect an application and being able to troubleshoot/debug, and optimize a codebase for maintainability is key.
 
 That's where I spend more time at this point than in hand coding.
+
+One thing you'll notice is that I left in some AI comments. While I prefer self-documenting code, sometimes these are helpful. Overcommunication is fine as long as it adds something non-obvious or that could slip through the cracks.
 
 ## What I'd Do With More Time
 

@@ -1,42 +1,29 @@
 import { useState, useMemo, useCallback } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, AlertTriangle, SkipForward, CheckCircle2 } from 'lucide-react';
-import type { MatchRecord, RejectionReason, Note } from '../types';
+import type { MatchRecord, RejectionReason } from '../types';
 import { STATUS, FACILITY_NAME } from '../constants';
 import { fullName, formatTimestamp } from '../utils/patients';
+
+const { CONFIRMED, REJECTED, FOLLOW_UP, UNREVIEWED } = STATUS;
+import { useMatchFilterCtx, useAppCtx, useMatchDataCtx } from '../contexts';
 import { FieldComparisonRow, buildFieldRows } from './FieldComparison';
 import { ConfidenceBadge } from './Badge';
 import Button from './Button';
 import ActionForm from './ActionForm';
 
-interface QuickReviewModalProps {
-  open: boolean;
-  records: MatchRecord[];
-  onClose: () => void;
-  onConfirm: (externalId: string) => void;
-  onReject: (externalId: string, reason: RejectionReason) => void;
-  onFollowUp: (externalId: string) => void;
-  onAddNote: (externalId: string, text: string) => void;
-  notes: Record<string, Note[]>;
-}
+type ActionType = typeof CONFIRMED | typeof REJECTED | typeof FOLLOW_UP | 'skipped';
 
-type ActionType = typeof STATUS.CONFIRMED | typeof STATUS.REJECTED | typeof STATUS.FOLLOW_UP | 'skipped';
+export default function QuickReviewModal() {
+  const { quickReviewRecords, quickReviewOpen, closeQuickReview } = useMatchFilterCtx();
+  const { handleQuickReviewConfirm, handleQuickReviewReject, handleQuickReviewFollowUp, handleAddNote } = useAppCtx();
+  const { notes } = useMatchDataCtx();
 
-export default function QuickReviewModal({
-  open,
-  records,
-  onClose,
-  onConfirm,
-  onReject,
-  onFollowUp,
-  onAddNote,
-  notes,
-}: QuickReviewModalProps) {
   // Snapshot records on mount so they don't disappear as statuses change
   const [snapshot] = useState(() => {
-    const queue = records.map((r) => r.match.ExternalPatientId);
+    const queue = quickReviewRecords.map((r) => r.match.ExternalPatientId);
     const map = new Map<string, MatchRecord>();
-    for (const r of records) {
+    for (const r of quickReviewRecords) {
       map.set(r.match.ExternalPatientId, r);
     }
     return { queue, map };
@@ -50,9 +37,8 @@ export default function QuickReviewModal({
   const reviewedCount = Object.keys(results).length;
   const isComplete = reviewedCount >= totalCount;
 
-  const currentRecord = !isComplete && snapshot.queue[currentIndex]
-    ? snapshot.map.get(snapshot.queue[currentIndex]) ?? null
-    : null;
+  const currentRecord =
+    !isComplete && snapshot.queue[currentIndex] ? (snapshot.map.get(snapshot.queue[currentIndex]) ?? null) : null;
 
   const advanceToNext = useCallback(() => {
     setTransitioning(true);
@@ -64,32 +50,41 @@ export default function QuickReviewModal({
     });
   }, []);
 
-  const handleConfirmDirect = useCallback((note?: string) => {
-    if (!currentRecord) return;
-    const id = currentRecord.match.ExternalPatientId;
-    if (note) onAddNote(id, note);
-    onConfirm(id);
-    setResults((prev) => ({ ...prev, [id]: STATUS.CONFIRMED }));
-    advanceToNext();
-  }, [currentRecord, onConfirm, onAddNote, advanceToNext]);
+  const handleConfirmDirect = useCallback(
+    (note?: string) => {
+      if (!currentRecord) return;
+      const id = currentRecord.match.ExternalPatientId;
+      if (note) handleAddNote(id, note);
+      handleQuickReviewConfirm(id);
+      setResults((prev) => ({ ...prev, [id]: CONFIRMED }));
+      advanceToNext();
+    },
+    [currentRecord, handleQuickReviewConfirm, handleAddNote, advanceToNext],
+  );
 
-  const handleRejectDirect = useCallback((reason: RejectionReason, note?: string) => {
-    if (!currentRecord) return;
-    const id = currentRecord.match.ExternalPatientId;
-    if (note) onAddNote(id, note);
-    onReject(id, reason);
-    setResults((prev) => ({ ...prev, [id]: STATUS.REJECTED }));
-    advanceToNext();
-  }, [currentRecord, onReject, onAddNote, advanceToNext]);
+  const handleRejectDirect = useCallback(
+    (reason: RejectionReason, note?: string) => {
+      if (!currentRecord) return;
+      const id = currentRecord.match.ExternalPatientId;
+      if (note) handleAddNote(id, note);
+      handleQuickReviewReject(id, reason);
+      setResults((prev) => ({ ...prev, [id]: REJECTED }));
+      advanceToNext();
+    },
+    [currentRecord, handleQuickReviewReject, handleAddNote, advanceToNext],
+  );
 
-  const handleFollowUpDirect = useCallback((note?: string) => {
-    if (!currentRecord) return;
-    const id = currentRecord.match.ExternalPatientId;
-    if (note) onAddNote(id, note);
-    onFollowUp(id);
-    setResults((prev) => ({ ...prev, [id]: STATUS.FOLLOW_UP }));
-    advanceToNext();
-  }, [currentRecord, onFollowUp, onAddNote, advanceToNext]);
+  const handleFollowUpDirect = useCallback(
+    (note?: string) => {
+      if (!currentRecord) return;
+      const id = currentRecord.match.ExternalPatientId;
+      if (note) handleAddNote(id, note);
+      handleQuickReviewFollowUp(id);
+      setResults((prev) => ({ ...prev, [id]: FOLLOW_UP }));
+      advanceToNext();
+    },
+    [currentRecord, handleQuickReviewFollowUp, handleAddNote, advanceToNext],
+  );
 
   const handleSkip = useCallback(() => {
     if (!currentRecord) return;
@@ -109,26 +104,25 @@ export default function QuickReviewModal({
   const progressPct = totalCount > 0 ? (reviewedCount / totalCount) * 100 : 0;
   const displayIndex = Math.min(currentIndex + 1, totalCount);
 
-  const currentNotes = currentRecord
-    ? notes[currentRecord.match.ExternalPatientId] ?? []
-    : [];
+  const currentNotes = currentRecord ? (notes[currentRecord.match.ExternalPatientId] ?? []) : [];
 
   return (
-    <Dialog.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Dialog.Root
+      open={quickReviewOpen}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) closeQuickReview();
+      }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
         <Dialog.Content
           className="fixed z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
             bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden
             flex flex-col focus:outline-none"
-          aria-describedby={undefined}
-        >
+          aria-describedby={undefined}>
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
             <div className="flex items-center gap-3">
-              <Dialog.Title className="text-lg font-semibold text-neutral-900 font-display">
-                Quick Review
-              </Dialog.Title>
+              <Dialog.Title className="text-lg font-semibold text-neutral-900 font-display">Quick Review</Dialog.Title>
               {!isComplete && (
                 <span className="text-sm text-neutral-500">
                   {displayIndex} of {totalCount}
@@ -138,8 +132,7 @@ export default function QuickReviewModal({
             <Dialog.Close asChild>
               <button
                 className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 transition-colors cursor-pointer"
-                aria-label="Close"
-              >
+                aria-label="Close">
                 <X className="w-5 h-5" />
               </button>
             </Dialog.Close>
@@ -161,12 +154,8 @@ export default function QuickReviewModal({
                 <div className="flex justify-center mb-4">
                   <CheckCircle2 className="w-12 h-12 text-success" />
                 </div>
-                <h2 className="text-xl font-semibold text-neutral-900 font-display mb-2">
-                  Review Complete
-                </h2>
-                <p className="text-sm text-neutral-500 mb-8">
-                  All {totalCount} matches have been reviewed.
-                </p>
+                <h2 className="text-xl font-semibold text-neutral-900 font-display mb-2">Review Complete</h2>
+                <p className="text-sm text-neutral-500 mb-8">All {totalCount} matches have been reviewed.</p>
                 <div className="flex justify-center gap-6 mb-8">
                   {summary.confirmed > 0 && (
                     <div className="text-center">
@@ -193,22 +182,22 @@ export default function QuickReviewModal({
                     </div>
                   )}
                 </div>
-                <Button variant="primary" size="md" onClick={onClose}>
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={closeQuickReview}>
                   Done
                 </Button>
               </div>
             ) : currentRecord ? (
               <div
                 key={currentRecord.match.ExternalPatientId}
-                className={`transition-opacity duration-150 ${transitioning ? 'opacity-0' : 'opacity-100'}`}
-              >
+                className={`transition-opacity duration-150 ${transitioning ? 'opacity-0' : 'opacity-100'}`}>
                 {/* Low confidence warning */}
-                {currentRecord.match.ConfidenceScore < 0.60 && (
+                {currentRecord.match.ConfidenceScore < 0.6 && (
                   <div className="flex items-center gap-2 px-6 py-2.5 bg-warning-bg border-b border-warning/20">
                     <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
-                    <span className="text-sm text-warning font-medium">
-                      Low confidence match — review carefully
-                    </span>
+                    <span className="text-sm text-warning font-medium">Low confidence match — review carefully</span>
                   </div>
                 )}
 
@@ -235,7 +224,10 @@ export default function QuickReviewModal({
                 {/* Field comparisons */}
                 <div className="px-6 py-2">
                   {buildFieldRows(currentRecord.internalPatient, currentRecord.externalPatient).map((field) => (
-                    <FieldComparisonRow key={field.label} {...field} />
+                    <FieldComparisonRow
+                      key={field.label}
+                      {...field}
+                    />
                   ))}
                 </div>
 
@@ -247,7 +239,9 @@ export default function QuickReviewModal({
                     </h3>
                     <div className="space-y-2 max-h-28 overflow-y-auto">
                       {currentNotes.map((note, i) => (
-                        <div key={i} className="border border-neutral-100 rounded-md p-2.5">
+                        <div
+                          key={i}
+                          className="border border-neutral-100 rounded-md p-2.5">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-xs font-medium text-neutral-700">{note.nurseLabel}</span>
                             <span className="text-xs text-neutral-400">{formatTimestamp(note.timestamp)}</span>
@@ -266,14 +260,17 @@ export default function QuickReviewModal({
           {!isComplete && currentRecord && (
             <div className="border-t border-neutral-200 px-6 py-4 space-y-3">
               <div className="flex items-center justify-between">
-                <Button variant="ghost" size="sm" onClick={handleSkip}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSkip}>
                   <SkipForward className="w-3.5 h-3.5" />
                   Skip
                 </Button>
               </div>
               <ActionForm
                 key={currentRecord.match.ExternalPatientId}
-                status={STATUS.PENDING}
+                status={UNREVIEWED}
                 onConfirmDirect={handleConfirmDirect}
                 onRejectDirect={handleRejectDirect}
                 onFollowUpDirect={handleFollowUpDirect}

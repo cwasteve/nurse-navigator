@@ -2,25 +2,23 @@ import { useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import type { RejectionReason } from '../types';
 import { REJECTION_CONFIG } from '../constants';
+import { useAppCtx } from '../contexts';
 import Button from './Button';
 
-interface RejectDialogProps {
-  open: boolean;
-  onConfirm: (reason: RejectionReason) => void;
-  onCancel: () => void;
-}
-
-export default function RejectDialog({ open, onConfirm, onCancel }: RejectDialogProps) {
+export default function RejectDialog() {
+  const { rejectExternalId, executeReject, cancelReject } = useAppCtx();
   const [selected, setSelected] = useState<RejectionReason | null>(null);
+
+  const open = !!rejectExternalId;
 
   function handleCancel() {
     setSelected(null);
-    onCancel();
+    cancelReject();
   }
 
   function handleConfirm() {
     if (!selected) return;
-    onConfirm(selected);
+    executeReject(selected);
     setSelected(null);
   }
 

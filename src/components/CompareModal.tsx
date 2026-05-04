@@ -1,50 +1,35 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import type { InternalPatient, ExternalPatient, MatchStatus, RejectionReason, Note } from '../types';
 import { REJECTION_CONFIG, STATUS, FACILITY_NAME } from '../constants';
 import { formatTimestamp } from '../utils/patients';
+
+const { FOLLOW_UP, REJECTED } = STATUS;
+import { useAppCtx } from '../contexts';
 import { FieldComparisonRow, buildFieldRows } from './FieldComparison';
 import { ConfidenceBadge, StatusBadge } from './Badge';
 import NoteInput from './NoteInput';
 import ActionForm from './ActionForm';
 
-interface CompareModalProps {
-  open: boolean;
-  internalPatient: InternalPatient;
-  externalPatient: ExternalPatient | null;
-  confidenceScore: number | null;
-  status: MatchStatus;
-  onClose: () => void;
-  onConfirmDirect: (note?: string) => void;
-  onRejectDirect: (reason: RejectionReason, note?: string) => void;
-  onFollowUpDirect: (note?: string) => void;
-  onUndoDirect: () => void;
-  notes: Note[];
-  onAddNote: (text: string) => void;
-  rejectionReason?: RejectionReason;
-}
+export default function CompareModal() {
+  const {
+    compareRecord,
+    closeCompare,
+    handleCompareConfirm,
+    handleCompareReject,
+    handleCompareFollowUp,
+    handleCompareUndo,
+    handleAddNote,
+  } = useAppCtx();
 
-export default function CompareModal({
-  open,
-  internalPatient,
-  externalPatient,
-  confidenceScore,
-  status,
-  onClose,
-  onConfirmDirect,
-  onRejectDirect,
-  onFollowUpDirect,
-  onUndoDirect,
-  notes,
-  onAddNote,
-  rejectionReason,
-}: CompareModalProps) {
+  if (!compareRecord) return null;
+
+  const { internalPatient, externalPatient, match, status, notes, rejectionReason } = compareRecord;
+  const confidenceScore = match.ConfidenceScore;
   const fields = buildFieldRows(internalPatient, externalPatient);
-
-  const isFollowUp = status === STATUS.FOLLOW_UP;
+  const isFollowUp = status === FOLLOW_UP;
 
   return (
-    <Dialog.Root open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Dialog.Root open onOpenChange={(isOpen) => { if (!isOpen) closeCompare(); }}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
         <Dialog.Content
@@ -57,11 +42,11 @@ export default function CompareModal({
           <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 rounded-t-xl flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Dialog.Title className="text-lg font-semibold text-neutral-900 font-display">
-                {externalPatient ? 'Compare Records' : 'Patient Details'}
+                Compare Records
               </Dialog.Title>
-              {confidenceScore !== null && <ConfidenceBadge score={confidenceScore} />}
+              <ConfidenceBadge score={confidenceScore} />
               <StatusBadge status={status} />
-              {status === STATUS.REJECTED && rejectionReason && (
+              {status === REJECTED && rejectionReason && (
                 <span className="text-xs text-neutral-500">
                   Reason: {REJECTION_CONFIG[rejectionReason].shortLabel}
                 </span>
@@ -82,9 +67,7 @@ export default function CompareModal({
           <div className="grid grid-cols-[140px_1fr_1fr_28px] gap-4 px-6 py-3 bg-neutral-50 border-b border-neutral-200">
             <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Field</span>
             <span className="text-xs font-semibold text-primary uppercase tracking-wider">{FACILITY_NAME}</span>
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-              {externalPatient ? 'External' : ''}
-            </span>
+            <span className="text-xs font-semibold text-primary uppercase tracking-wider">External</span>
             <span />
           </div>
 
@@ -114,7 +97,7 @@ export default function CompareModal({
                   ))}
                 </div>
               )}
-              <NoteInput onSubmit={onAddNote} />
+              <NoteInput onSubmit={(text) => handleAddNote(match.ExternalPatientId, text)} />
             </div>
           )}
 
@@ -139,18 +122,16 @@ export default function CompareModal({
           )}
 
           {/* Footer actions — key resets ActionForm state on status change */}
-          {externalPatient && (
-            <div className="sticky bottom-0 bg-white border-t border-neutral-200 px-6 py-4 rounded-b-xl">
-              <ActionForm
-                key={`${open}-${status}`}
-                status={status}
-                onConfirmDirect={onConfirmDirect}
-                onRejectDirect={onRejectDirect}
-                onFollowUpDirect={onFollowUpDirect}
-                onUndoDirect={onUndoDirect}
-              />
-            </div>
-          )}
+          <div className="sticky bottom-0 bg-white border-t border-neutral-200 px-6 py-4 rounded-b-xl">
+            <ActionForm
+              key={status}
+              status={status}
+              onConfirmDirect={handleCompareConfirm}
+              onRejectDirect={handleCompareReject}
+              onFollowUpDirect={handleCompareFollowUp}
+              onUndoDirect={handleCompareUndo}
+            />
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

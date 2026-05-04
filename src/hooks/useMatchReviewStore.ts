@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import type { MatchStatus, RejectionReason, Note } from '../types';
 import { STATUS } from '../constants/status';
 import { createNote } from '../utils/nurse';
+
+const { UNREVIEWED } = STATUS;
 import {
   loadAllStatuses,
   loadAllRejectionReasons,
@@ -41,10 +43,10 @@ export function useMatchReviewStore(matchIds: string[]): UseMatchReviewStoreRetu
 
       if (cancelled) return;
 
-      // Initialize any missing match IDs to 'pending'
+      // Initialize any missing match IDs to 'unreviewed'
       const mergedStatuses: Record<string, MatchStatus> = {};
       for (const id of matchIds) {
-        mergedStatuses[id] = savedStatuses[id] ?? STATUS.PENDING;
+        mergedStatuses[id] = savedStatuses[id] ?? UNREVIEWED;
       }
 
       setStatuses(mergedStatuses);
@@ -54,14 +56,16 @@ export function useMatchReviewStore(matchIds: string[]): UseMatchReviewStoreRetu
     }
 
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [matchIds]);
 
   const updateStatus = useCallback((externalId: string, status: MatchStatus) => {
     setStatuses((prev) => ({ ...prev, [externalId]: status }));
     saveStatus(externalId, status);
 
-    if (status === STATUS.PENDING) {
+    if (status === UNREVIEWED) {
       setRejectionReasons((prev) => {
         const next = { ...prev };
         delete next[externalId];

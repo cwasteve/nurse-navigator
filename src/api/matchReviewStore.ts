@@ -1,8 +1,6 @@
 import type { MatchStatus, RejectionReason, Note } from '../types';
 import { getDb } from './db';
 
-// --- Statuses ---
-
 export async function loadAllStatuses(): Promise<Record<string, MatchStatus>> {
   const db = await getDb();
   const rows = await db.getAll('statuses');
@@ -17,8 +15,6 @@ export async function saveStatus(externalId: string, status: MatchStatus): Promi
   const db = await getDb();
   await db.put('statuses', { externalId, status });
 }
-
-// --- Rejection Reasons ---
 
 export async function loadAllRejectionReasons(): Promise<Record<string, RejectionReason>> {
   const db = await getDb();
@@ -40,8 +36,6 @@ export async function removeRejectionReason(externalId: string): Promise<void> {
   await db.delete('rejectionReasons', externalId);
 }
 
-// --- Notes ---
-
 export async function loadAllNotes(): Promise<Record<string, Note[]>> {
   const db = await getDb();
   const rows = await db.getAll('notes');
@@ -56,8 +50,6 @@ export async function saveNotes(externalId: string, notes: Note[]): Promise<void
   const db = await getDb();
   await db.put('notes', { externalId, notes });
 }
-
-// --- Bulk ---
 
 export async function clearAllReviewData(): Promise<void> {
   const db = await getDb();
