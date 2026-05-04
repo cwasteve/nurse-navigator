@@ -180,16 +180,25 @@ That's where I spend more time at this point than in hand coding.
 
 One thing you'll notice is that I left in some AI comments. While I prefer self-documenting code, sometimes these are helpful. Overcommunication is fine as long as it adds something non-obvious or that could slip through the cracks.
 
+## Enhancements
+
+The biggest enhancement by far is the "Quick Review" functionality. This speeds up the review process quite a bit, in my opinion, and is probably the thing most likely to be used most readily by nurses.
+
+Second is the "Undo" toast. I think that's just a nice element that puts the "Undo" function immediately at your fingertips.
+
+And the last major enhancement is the auto-suggest in search. That's another easy win for UX for the nurses who might utilize this kind of application.
+
 ## What I'd Do With More Time
 
 I probably spent about 8-9 hours in the application creation and review, and another hour writing this up and checking everything.
 
 If I had more time I'd harden this codebase a bit with more tests and I'd spend more time re-reviewing and optimizing the code. Admittedly, the biggest weakness is definitely on edge case handling.
 
-**Top 3 Things**
+**Top Things**
 
 1. More edge case testing & handling
 2. Estensibility for additional data sources, APIs/an API wrapper for different DBs
 3. More complex search functionality to handle and/or more complex filter logic (i.e. filters on why someone was rejected + confidence score, etc. so we could use that info to improve matching algo maybe)
+4. Better accessibility - although I've used RadixUI to help give me some of that out of the box, I'd like to ensure the table is more accessible. This is especially true when it comes to interactions such as selecting a row for comparison.
 
 Overall I'm happy with this application.
