@@ -1,0 +1,207 @@
+[
+  {
+    "ExternalPatientId": "EXT0006",
+    "InternalPatientId": "INT0025",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0009",
+    "InternalPatientId": "INT0029",
+    "ConfidenceScore": 0.545
+  },
+  {
+    "ExternalPatientId": "EXT0021",
+    "InternalPatientId": "INT0083",
+    "ConfidenceScore": 0.818
+  },
+  {
+    "ExternalPatientId": "EXT0024",
+    "InternalPatientId": "INT0096",
+    "ConfidenceScore": 0.682
+  },
+  {
+    "ExternalPatientId": "EXT0025",
+    "InternalPatientId": "INT0104",
+    "ConfidenceScore": 0.682
+  },
+  {
+    "ExternalPatientId": "EXT0030",
+    "InternalPatientId": "INT0111",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0031",
+    "InternalPatientId": "INT0119",
+    "ConfidenceScore": 0.682
+  },
+  {
+    "ExternalPatientId": "EXT0034",
+    "InternalPatientId": "INT0135",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0039",
+    "InternalPatientId": "INT0145",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0041",
+    "InternalPatientId": "INT0151",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0050",
+    "InternalPatientId": "INT0199",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0059",
+    "InternalPatientId": "INT0223",
+    "ConfidenceScore": 0.864
+  },
+  {
+    "ExternalPatientId": "EXT0060",
+    "InternalPatientId": "INT0238",
+    "ConfidenceScore": 0.818
+  },
+  {
+    "ExternalPatientId": "EXT0064",
+    "InternalPatientId": "INT0246",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0067",
+    "InternalPatientId": "INT0270",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0070",
+    "InternalPatientId": "INT0281",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0073",
+    "InternalPatientId": "INT0288",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0080",
+    "InternalPatientId": "INT0304",
+    "ConfidenceScore": 1
+  },
+  {
+    "ExternalPatientId": "EXT0082",
+    "InternalPatientId": "INT0315",
+    "ConfidenceScore": 0.864
+  },
+  {
+    "ExternalPatientId": "EXT0090",
+    "InternalPatientId": "INT0369",
+    "ConfidenceScore": 0.3
+  },
+  {
+    "ExternalPatientId": "EXT0091",
+    "InternalPatientId": "INT0752",
+    "ConfidenceScore": 0.818
+  },
+  {
+    "ExternalPatientId": "EXT0101",
+    "InternalPatientId": "INT0399",
+    "ConfidenceScore": 0.455
+  },
+  {
+    "ExternalPatientId": "EXT0102",
+    "InternalPatientId": "INT0255",
+    "ConfidenceScore": 0.636
+  },
+  {
+    "ExternalPatientId": "EXT0103",
+    "InternalPatientId": "INT0407",
+    "ConfidenceScore": 1
+  },
+  {
+    "ExternalPatientId": "EXT0105",
+    "InternalPatientId": "INT0423",
+    "ConfidenceScore": 0.864
+  },
+  {
+    "ExternalPatientId": "EXT0106",
+    "InternalPatientId": "INT0435",
+    "ConfidenceScore": 0.864
+  },
+  {
+    "ExternalPatientId": "EXT0107",
+    "InternalPatientId": "INT0149",
+    "ConfidenceScore": 0.818
+  },
+  {
+    "ExternalPatientId": "EXT0111",
+    "InternalPatientId": "INT0458",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0116",
+    "InternalPatientId": "INT0471",
+    "ConfidenceScore": 1
+  },
+  {
+    "ExternalPatientId": "EXT0122",
+    "InternalPatientId": "INT0491",
+    "ConfidenceScore": 0.455
+  },
+  {
+    "ExternalPatientId": "EXT0124",
+    "InternalPatientId": "INT0497",
+    "ConfidenceScore": 1
+  },
+  {
+    "ExternalPatientId": "EXT0125",
+    "InternalPatientId": "INT0500",
+    "ConfidenceScore": 0.364
+  },
+  {
+    "ExternalPatientId": "EXT0133",
+    "InternalPatientId": "INT0523",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0144",
+    "InternalPatientId": "INT0561",
+    "ConfidenceScore": 0.455
+  },
+  {
+    "ExternalPatientId": "EXT0148",
+    "InternalPatientId": "INT0566",
+    "ConfidenceScore": 0.909
+  },
+  {
+    "ExternalPatientId": "EXT0157",
+    "InternalPatientId": "INT0832",
+    "ConfidenceScore": 0.455
+  },
+  {
+    "ExternalPatientId": "EXT0161",
+    "InternalPatientId": "INT0635",
+    "ConfidenceScore": 0.5
+  },
+  {
+    "ExternalPatientId": "EXT0175",
+    "InternalPatientId": "INT0703",
+    "ConfidenceScore": 0.818
+  },
+  {
+    "ExternalPatientId": "EXT0189",
+    "InternalPatientId": "INT0768",
+    "ConfidenceScore": 0.773
+  },
+  {
+    "ExternalPatientId": "EXT0203",
+    "InternalPatientId": "INT0830",
+    "ConfidenceScore": 0.3
+  },
+  {
+    "ExternalPatientId": "EXT0207",
+    "InternalPatientId": "INT0842",
+    "ConfidenceScore": 0.727
+  }
+]
