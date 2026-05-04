@@ -7,9 +7,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
+  timeout: 10_000,
   use: {
     ctViteConfig: {
-      plugins: [react(), tailwindcss()],
+      plugins: [
+        react({ include: /\.(jsx|tsx|mdx)$/ }),
+        tailwindcss(),
+      ],
     },
     ...devices['Desktop Chrome'],
   },

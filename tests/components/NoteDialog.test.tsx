@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/experimental-ct-react';
 import NoteDialog from '../../src/components/NoteDialog';
+import NoteDialogWrapper from './wrappers/NoteDialogWrapper';
 import type { Note } from '../../src/types';
 
 const sampleNotes: Note[] = [
@@ -12,56 +13,38 @@ const sampleNotes: Note[] = [
 ];
 
 test.describe('NoteDialog', () => {
-  test('editable=false hides NoteInput', async ({ mount, page }) => {
+  test('non-follow_up status hides NoteInput', async ({ mount, page }) => {
     await mount(
-      <NoteDialog
-        open={true}
-        onClose={() => {}}
-        notes={sampleNotes}
-        onAddNote={() => {}}
-        patientLabel="Smith, Jane"
-        editable={false}
-      />,
+      <NoteDialogWrapper status="confirmed" notes={sampleNotes}>
+        <NoteDialog />
+      </NoteDialogWrapper>,
     );
     await expect(page.getByRole('textbox')).toHaveCount(0);
   });
 
-  test('editable=true shows NoteInput', async ({ mount, page }) => {
+  test('follow_up status shows NoteInput', async ({ mount, page }) => {
     await mount(
-      <NoteDialog
-        open={true}
-        onClose={() => {}}
-        notes={sampleNotes}
-        onAddNote={() => {}}
-        patientLabel="Smith, Jane"
-        editable={true}
-      />,
+      <NoteDialogWrapper status="follow_up" notes={sampleNotes}>
+        <NoteDialog />
+      </NoteDialogWrapper>,
     );
     await expect(page.getByRole('textbox')).toBeVisible();
   });
 
   test('empty notes shows "No notes yet."', async ({ mount, page }) => {
     await mount(
-      <NoteDialog
-        open={true}
-        onClose={() => {}}
-        notes={[]}
-        onAddNote={() => {}}
-        patientLabel="Smith, Jane"
-      />,
+      <NoteDialogWrapper status="follow_up" notes={[]}>
+        <NoteDialog />
+      </NoteDialogWrapper>,
     );
     await expect(page.getByText('No notes yet.')).toBeVisible();
   });
 
   test('populated notes render', async ({ mount, page }) => {
     await mount(
-      <NoteDialog
-        open={true}
-        onClose={() => {}}
-        notes={sampleNotes}
-        onAddNote={() => {}}
-        patientLabel="Smith, Jane"
-      />,
+      <NoteDialogWrapper status="follow_up" notes={sampleNotes}>
+        <NoteDialog />
+      </NoteDialogWrapper>,
     );
     await expect(page.getByText('Called patient, no answer.')).toBeVisible();
     await expect(page.getByText('Sarah Mitchell, RN')).toBeVisible();

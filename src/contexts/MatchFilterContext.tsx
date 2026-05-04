@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import type { MatchRecord, SortConfig } from '../types';
 import type { TabKey } from '../constants';
 import { useMatchFilters } from '../hooks/useMatchFilters';
@@ -24,7 +24,7 @@ interface MatchFilterContextValue {
   closeQuickReview: () => void;
 }
 
-const MatchFilterContext = createContext<MatchFilterContextValue | null>(null);
+export const MatchFilterContext = createContext<MatchFilterContextValue | null>(null);
 
 export function useMatchFilterCtx(): MatchFilterContextValue {
   const ctx = useContext(MatchFilterContext);
@@ -32,7 +32,7 @@ export function useMatchFilterCtx(): MatchFilterContextValue {
   return ctx;
 }
 
-export function MatchFilterProvider({ children }: { children: React.ReactNode }) {
+export function MatchFilterProvider({ children }: { children: ReactNode }) {
   const { matchRecords } = useMatchDataCtx();
   const filters = useMatchFilters(matchRecords);
   const selection = useMatchSelection(filters.tabFiltered);

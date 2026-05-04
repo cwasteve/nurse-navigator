@@ -3,7 +3,7 @@ import Tabs from '../../src/components/Tabs';
 import type { MatchStatus } from '../../src/types';
 
 const counts: Record<MatchStatus, number> = {
-  pending: 10,
+  unreviewed: 10,
   confirmed: 5,
   rejected: 2,
   follow_up: 3,
@@ -12,7 +12,11 @@ const counts: Record<MatchStatus, number> = {
 test.describe('Tabs', () => {
   test('renders 4 tabs with labels and counts', async ({ mount }) => {
     const component = await mount(
-      <Tabs activeTab="pending" onTabChange={() => {}} counts={counts} />,
+      <Tabs
+        activeTab="unreviewed"
+        onTabChange={() => {}}
+        counts={counts}
+      />,
     );
     const buttons = component.getByRole('button');
     await expect(buttons).toHaveCount(4);
@@ -25,7 +29,13 @@ test.describe('Tabs', () => {
   test('click fires onTabChange with the correct key', async ({ mount }) => {
     let changed = '';
     const component = await mount(
-      <Tabs activeTab="pending" onTabChange={(key) => { changed = key; }} counts={counts} />,
+      <Tabs
+        activeTab="unreviewed"
+        onTabChange={(key) => {
+          changed = key;
+        }}
+        counts={counts}
+      />,
     );
     await component.getByRole('button', { name: /Confirmed/ }).click();
     expect(changed).toBe('confirmed');

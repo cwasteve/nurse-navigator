@@ -1,3 +1,3 @@
-export { MatchDataProvider, useMatchDataCtx } from './MatchDataContext';
-export { MatchFilterProvider, useMatchFilterCtx } from './MatchFilterContext';
-export { AppProvider, useAppCtx } from './AppContext';
+export { MatchDataProvider, useMatchDataCtx, MatchDataContext } from './MatchDataContext';
+export { MatchFilterProvider, useMatchFilterCtx, MatchFilterContext } from './MatchFilterContext';
+export { AppProvider, useAppCtx, AppContext } from './AppContext';

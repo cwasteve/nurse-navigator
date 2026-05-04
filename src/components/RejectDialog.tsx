@@ -2,12 +2,18 @@ import { useState } from 'react';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import type { RejectionReason } from '../types';
 import { REJECTION_CONFIG } from '../constants';
-import { useAppCtx } from '../contexts';
+import { useAppCtx, useMatchDataCtx } from '../contexts';
 import Button from './Button';
+import { fullName } from '../utils/patients';
 
 export default function RejectDialog() {
   const { rejectExternalId, executeReject, cancelReject } = useAppCtx();
   const [selected, setSelected] = useState<RejectionReason | null>(null);
+  const { recordsByExternalId } = useMatchDataCtx();
+
+  const externalPatient = rejectExternalId
+    ? recordsByExternalId.get(rejectExternalId)?.externalPatient ?? null
+    : null;
 
   const open = !!rejectExternalId;
 
@@ -35,7 +41,7 @@ export default function RejectDialog() {
             bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6
             focus:outline-none">
           <AlertDialog.Title className="text-base font-semibold text-neutral-900 font-display">
-            Reject this match?
+            Reject match{externalPatient ? ` for ${fullName(externalPatient)}` : ''}?
           </AlertDialog.Title>
           <AlertDialog.Description className="mt-2 text-sm text-neutral-600 leading-relaxed">
             Select a reason for rejecting this match. You can undo this later.

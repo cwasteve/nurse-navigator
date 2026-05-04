@@ -45,8 +45,8 @@ export default function NoteDialog() {
               <p className="text-sm text-neutral-400 text-center py-6">No notes yet.</p>
             ) : (
               <div className="space-y-3">
-                {notes.map((note, i) => (
-                  <div key={i} className="border border-neutral-100 rounded-md p-3">
+                {notes.map((note) => (
+                  <div key={note.timestamp} className="border border-neutral-100 rounded-md p-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-neutral-700">{note.nurseLabel}</span>
                       <span className="text-xs text-neutral-400">{formatTimestamp(note.timestamp)}</span>

@@ -65,8 +65,13 @@ describe('searchableDOB', () => {
     expect(result).toContain('march');
   });
 
-  it('includes month + day without leading zero', () => {
+  it('includes month + day with leading zero', () => {
     const result = searchableDOB('1990-03-15');
+    expect(result).toContain('march 15');
+  });
+
+  it('includes month + day without leading zero', () => {
+    const result = searchableDOB('1990-3-15');
     expect(result).toContain('march 15');
   });
 
@@ -221,6 +226,7 @@ describe('patientMatchesQuery', () => {
   });
 });
 
+// We only use this for notes, but it could be relevant in other cases
 describe('formatTimestamp', () => {
   it('contains the year', () => {
     const result = formatTimestamp('2026-05-02T15:45:00.000Z');

@@ -19,7 +19,7 @@ export default function QuickReviewModal() {
   const { handleQuickReviewConfirm, handleQuickReviewReject, handleQuickReviewFollowUp, handleAddNote } = useAppCtx();
   const { notes } = useMatchDataCtx();
 
-  // Snapshot records on mount so they don't disappear as statuses change
+  // If we don't do this we get a flash on re-render - this is an easy way to prevent that without additional complexity
   const [snapshot] = useState(() => {
     const queue = quickReviewRecords.map((r) => r.match.ExternalPatientId);
     const map = new Map<string, MatchRecord>();
@@ -238,9 +238,9 @@ export default function QuickReviewModal() {
                       Notes ({currentNotes.length})
                     </h3>
                     <div className="space-y-2 max-h-28 overflow-y-auto">
-                      {currentNotes.map((note, i) => (
+                      {currentNotes.map((note) => (
                         <div
-                          key={i}
+                          key={note.timestamp}
                           className="border border-neutral-100 rounded-md p-2.5">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-xs font-medium text-neutral-700">{note.nurseLabel}</span>

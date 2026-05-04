@@ -1,10 +1,11 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import type { MatchRecord, MatchStatus, Note, RejectionReason } from '../types';
 import { useMatchReviewStore } from '../hooks/useMatchReviewStore';
 import { useMatchData, allMatchIds } from '../hooks/useMatchData';
 
-interface MatchDataContextValue {
+export interface MatchDataContextValue {
   matchRecords: MatchRecord[];
+  recordsByExternalId: Map<string, MatchRecord>;
   stats: Record<MatchStatus, number>;
   isLoading: boolean;
   notes: Record<string, Note[]>;
@@ -16,7 +17,7 @@ interface MatchDataContextValue {
   removeRejectionReason: (id: string) => void;
 }
 
-const MatchDataContext = createContext<MatchDataContextValue | null>(null);
+export const MatchDataContext = createContext<MatchDataContextValue | null>(null);
 
 export function useMatchDataCtx(): MatchDataContextValue {
   const ctx = useContext(MatchDataContext);
@@ -24,12 +25,18 @@ export function useMatchDataCtx(): MatchDataContextValue {
   return ctx;
 }
 
-export function MatchDataProvider({ children }: { children: React.ReactNode }) {
+export function MatchDataProvider({ children }: { children: ReactNode }) {
   const reviewStore = useMatchReviewStore(allMatchIds);
   const { matchRecords, stats } = useMatchData(reviewStore);
 
+  const recordsByExternalId = useMemo(
+    () => new Map(matchRecords.map((r) => [r.match.ExternalPatientId, r])),
+    [matchRecords],
+  );
+
   const value: MatchDataContextValue = {
     matchRecords,
+    recordsByExternalId,
     stats,
     isLoading: reviewStore.isLoading,
     notes: reviewStore.notes,

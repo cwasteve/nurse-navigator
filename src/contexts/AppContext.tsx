@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import { createContext, useContext, useState, useMemo, useCallback, type ReactNode } from 'react';
 import type { MatchStatus, MatchRecord, RejectionReason, UndoToastItem, SearchSuggestion } from '../types';
 import { STATUS } from '../constants/status';
 import { fullName, formatDOB, patientMatchesQuery } from '../utils/patients';
@@ -49,7 +49,7 @@ interface AppContextValue {
   dismissToast: (id: string) => void;
 }
 
-const AppContext = createContext<AppContextValue | null>(null);
+export const AppContext = createContext<AppContextValue | null>(null);
 
 export function useAppCtx(): AppContextValue {
   const ctx = useContext(AppContext);
@@ -57,8 +57,8 @@ export function useAppCtx(): AppContextValue {
   return ctx;
 }
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  const { matchRecords, updateStatus, addNote, setRejectionReason, statuses } = useMatchDataCtx();
+export function AppProvider({ children }: { children: ReactNode }) {
+  const { matchRecords, recordsByExternalId, updateStatus, addNote, setRejectionReason, statuses } = useMatchDataCtx();
   const { search, setSearch, setActiveTab, clearSelection } = useMatchFilterCtx();
 
   // Store only the external ID — derive the full record from matchRecords
@@ -67,17 +67,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [noteDialogId, setNoteDialogId] = useState<string | null>(null);
   const [undoToasts, setUndoToasts] = useState<UndoToastItem[]>([]);
 
-  // Derive compareRecord from matchRecords — always fresh data
+  // Derive compareRecord from the lookup map — always fresh data
   const compareRecord = useMemo(
-    () =>
-      compareExternalId ? (matchRecords.find((r) => r.match.ExternalPatientId === compareExternalId) ?? null) : null,
-    [compareExternalId, matchRecords],
+    () => (compareExternalId ? recordsByExternalId.get(compareExternalId) ?? null : null),
+    [compareExternalId, recordsByExternalId],
   );
 
   const noteDialogRecord = useMemo(() => {
     if (!noteDialogId) return null;
-    return matchRecords.find((r) => r.match.ExternalPatientId === noteDialogId) ?? null;
-  }, [noteDialogId, matchRecords]);
+    return recordsByExternalId.get(noteDialogId) ?? null;
+  }, [noteDialogId, recordsByExternalId]);
 
   // ─── Undo toast helpers ──────────────────────────────────────────
   const dismissToast = useCallback((id: string) => {
@@ -95,7 +94,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const prevStatus = statuses[externalId] ?? UNREVIEWED;
       updateStatus(externalId, newStatus);
 
-      const record = matchRecords.find((r) => r.match.ExternalPatientId === externalId);
+      const record = recordsByExternalId.get(externalId);
       if (record) {
         const name = fullName(record.externalPatient);
         const label =
@@ -111,7 +110,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [statuses, updateStatus, matchRecords, pushUndoToast],
+    [statuses, updateStatus, recordsByExternalId, pushUndoToast],
   );
 
   const handleAddNote = useCallback(
