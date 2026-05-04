@@ -43,7 +43,7 @@ This meant having multiple ways to undo decisions, and therefore having hooks an
 
 Even our "Quick View" is really just a stack of "Compare Cards" that the nurse can quickly go through.
 
-### Tradeoffs
+## Tradeoffs
 
 I mentioned earlier (and I mention throughout this) that the main tradeoff is lack of guardrails. That seems fine to me in this circumstance and with this specific assignment. In other cases we may want both guardrails and easy undo.
 
@@ -142,4 +142,32 @@ For the first two needs I created unit tests using vitest, and for the latter po
 - Run component tests (playwright) with `bun test:components`
 - E2E tests with `bun test:e2e` (if you want to watch it in the browser, add the `--headed` flag)
 
+## Use of AI (Claude Code)
+
+I wrote the initial plan (`/project_plans/01_foundation-plan.md`) by prompting Claude Code in my own words with what the project was about. I didn't want to copy/paste the whole assignment in, however, I knew the principles and focual points I wanted.
+
+After seeing what it came up with, I had it code some of the foundations and then I set to work coding up the appropriate use cases, paths, and share logic/components. What I generally do is make the architectural decisions, given it constraints (only some of which are in the `CLAUDE.md` file), and then I had to:
+
+- Make the code more reusable with shared components and types
+- Add appropriate `/constants`
+- Create/update `/utils`
+- Add hooks
+- Add tests
+
+I tend to treat AI like a junior developer. If you create the architectural guidance and requirements, give it very specific instructions, and then check its work - it's a great way to delegate. After all, creating a component is more or less boilerplate. Same with creating a hook. But knowing how to architect an application and being able to troubleshoot/debug, and optimize a codebase for maintainability is key.
+
+That's where I spend more time at this point than in hand coding.
+
 ## What I'd Do With More Time
+
+I probably spent about 8-9 hours in the application creation and review, and another hour writing this up and checking everything.
+
+If I had more time I'd harden this codebase a bit with more tests and I'd spend more time re-reviewing and optimizing the code. Admittedly, the biggest weakness is definitely on edge case handling.
+
+**Top 3 Things**
+
+1. More edge case testing & handling
+2. Estensibility for additional data sources, APIs/an API wrapper for different DBs
+3. More complex search functionality to handle and/or more complex filter logic (i.e. filters on why someone was rejected + confidence score, etc. so we could use that info to improve matching algo maybe)
+
+Overall I'm happy with this application.
