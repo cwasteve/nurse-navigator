@@ -44,11 +44,11 @@ export function formatDOB(dob: string): string {
     return `${MONTH_MAP[mon]}/${day}/${year}`;
   }
 
-  // YYYY-MM-DD (internal format)
-  const intMatch = dob.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  // YYYY-MM-DD or YYYY-M-DD (internal format, 1- or 2-digit month/day)
+  const intMatch = dob.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (intMatch) {
     const [, year, month, day] = intMatch;
-    return `${month}/${day}/${year}`;
+    return `${month.padStart(2, '0')}/${day.padStart(2, '0')}/${year}`;
   }
 
   return dob;
